@@ -134,3 +134,10 @@ export const adminLogin = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+export const adminLogout = asyncHandler(async (req, res, next) => {
+  res.json({
+    status: "success",
+    message: "Admin logged out successfully",
+  });
+});

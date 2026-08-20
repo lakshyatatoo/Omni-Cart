@@ -8,6 +8,7 @@ import {
   updateProfile,
   updatePassword,
   adminLogin,
+  adminLogout,
 } from "../controllers/auth.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -24,6 +25,8 @@ router.post("/login", loginValidator, validate, login);
 router.post("/signin", adminLogin);
 
 router.post("/logout", logout);
+
+router.post("/admin/logout", adminLogout);
 
 router.use(authMiddleware);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router";
 import api from "../../utils/axios";
 import "./AdminDashboard.css";
@@ -6,6 +6,7 @@ import "./AdminDashboard.css";
 export function AdminDashboard() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [adminName, setAdminName] = useState("Admin");
   const [form, setForm] = useState({
     title: "",
     price: "",
@@ -26,6 +27,21 @@ export function AdminDashboard() {
     };
     fetchProducts();
   }, []);
+
+  // Check admin token and set name
+  useEffect(() => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (adminToken) {
+      try {
+        const decoded = JSON.parse(atob(adminToken.split(".")[1]));
+        setAdminName(decoded.role === "admin" ? "Admin" : "Guest");
+      } catch (e) {
+        setAdminName("Admin");
+      }
+    }
+  }, []);
+
+  const handleInputChange = (e) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -69,10 +85,27 @@ export function AdminDashboard() {
     }
   };
 
+  const handleAdminLogout = async () => {
+    try {
+      await api.post("/api/admin/logout");
+      localStorage.removeItem("adminToken");
+      setAdminName("Admin");
+      navigate("/");
+    } catch (error) {
+      console.error("Admin logout failed:", error);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="admin-header">
         <h1>Admin Panel</h1>
+        <div className="admin-user">
+          <span>Welcome, {adminName}</span>
+          <button onClick={handleAdminLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
         <button onClick={() => navigate("/")} className="admin-back-btn">Back</button>
       </div>
 
