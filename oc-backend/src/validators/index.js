@@ -47,6 +47,17 @@ export const loginValidator = [
     .withMessage('Password is required')
 ];
 
+export const adminLoginValidator = [
+  body('username')
+    .trim()
+    .notEmpty()
+    .withMessage('Username is required'),
+  
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required')
+];
+
 export const productValidator = [
   body('name')
     .trim()

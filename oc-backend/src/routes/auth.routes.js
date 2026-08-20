@@ -7,12 +7,12 @@ import {
   getMe,
   updateProfile,
   updatePassword,
+  adminLogin,
 } from "../controllers/auth.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 import { registerValidator, loginValidator } from "../validators/index.js";
-
 import { validate } from "../middleware/validation.middleware.js";
 
 const router = express.Router();
@@ -20,6 +20,8 @@ const router = express.Router();
 router.post("/register", registerValidator, validate, register);
 
 router.post("/login", loginValidator, validate, login);
+
+router.post("/signin", adminLogin);
 
 router.post("/logout", logout);
 

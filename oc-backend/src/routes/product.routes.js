@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   createProductController,
   getProductsController,
@@ -29,6 +30,7 @@ router.get(
 );
 router.get("/:id", mongoIdParam, validate, getProductController);
 
+// Protected routes: verifyToken (authMiddleware) + isAdmin (adminMiddleware)
 router.use(authMiddleware, adminMiddleware);
 
 router.post("/", productValidator, validate, createProductController);

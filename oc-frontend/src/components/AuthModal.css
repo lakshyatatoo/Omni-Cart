@@ -106,3 +106,32 @@
   color: rgb(79, 70, 229);
   text-decoration: underline;
 }
+
+.auth-modal-field {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.auth-modal-field-label {
+  display: block;
+  font-size: 14px;
+  color: rgb(100, 100, 100);
+  margin-bottom: 8px;
+}
+
+.auth-modal-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: rgb(15, 23, 42);
+  background-color: rgb(249, 250, 251);
+  border: 1px solid rgb(229, 231, 235);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-modal-input:focus {
+  border-color: rgb(99, 102, 241);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}

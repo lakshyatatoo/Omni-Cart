@@ -4,6 +4,7 @@ import {
   getUserProfile,
   updateUserProfile,
   changePassword,
+  adminLoginUser,
 } from "../services/auth.service.js";
 import { generateToken } from "../utils/jwt.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -107,5 +108,29 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
   res.json({
     status: "success",
     message: "Password updated successfully",
+  });
+});
+
+export const adminLogin = asyncHandler(async (req, res, next) => {
+  const { username, password } = req.body;
+
+  if (
+    username !== process.env.ADMIN_USERNAME ||
+    password !== process.env.ADMIN_PASSWORD
+  ) {
+    return next(
+      new AppError("Invalid admin credentials", 401),
+    );
+  }
+
+  const token = generateToken({ id: "admin", role: "admin" }, "1d");
+
+  res.json({
+    status: "success",
+    token,
+    user: {
+      id: "admin",
+      role: "admin",
+    },
   });
 });

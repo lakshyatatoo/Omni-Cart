@@ -158,3 +158,19 @@
   height: 34px;
   margin-top: 1px;
 }
+
+.manage-footer {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.manage-footer .manage-link {
+  color: rgb(100, 100, 100);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.manage-footer .manage-link:hover {
+  color: rgb(59, 59, 59);
+}

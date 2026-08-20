@@ -80,3 +80,13 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 
   return { message: 'Password updated successfully' };
 };
+
+export const adminLoginUser = async (username, password) => {
+  if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
+    throw new AppError('Invalid admin credentials', 401);
+  }
+
+  const token = generateToken({ id: 'admin', role: 'admin' }, '1d');
+
+  return { token };
+};

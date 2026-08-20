@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router";
 import { Homepage } from "./pages/home/Homepage";
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { CheckoutPage } from "./pages/checkout/CheckoutPage";
 import { Orders } from "./pages/orders/Orders";
 import { Profile } from "./pages/Profile";
@@ -9,7 +10,7 @@ import { Login } from "./pages/auth/Login";
 import { Register } from "./pages/auth/Register";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-// import { AuthModal } from "./components/AuthModal";
+import { AuthModal } from "./components/AuthModal";
 import api from "./utils/axios";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -41,6 +42,10 @@ function App() {
 
         {/* Main pages */}
         <Route index element={<Homepage cart={cart} loadCart={loadCart} />} />
+
+        <Route path="admin" element={<AdminDashboard />} />
+
+        <Route path="admin-login" element={<AuthModal />} />
 
         <Route
           path="checkout"
