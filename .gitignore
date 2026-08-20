@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment Variables (Keep sensitive keys hidden)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Production & Build Outputs
+dist/
+dist-ssr/
+build/
+out/
+*.tsbuildinfo
+
+# Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE & Editor Files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS System Files
+.DS_Store
+Thumbs.db
+
+# Databases & Runtime Storage
+*.sqlite
+*.db
+uploads/
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+
+# Service Deployment Artifacts
+.vercel
+.netlify
+
+# Repomix outputs
+repomix-output.*
+repomix.config.json

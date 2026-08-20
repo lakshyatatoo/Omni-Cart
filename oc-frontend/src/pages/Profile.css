@@ -1,0 +1,73 @@
+.profile-page {
+  max-width: 600px;
+  margin: 140px auto 100px auto;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.profile-page .page-title {
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+
+.profile-page .profile-message {
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.profile-page .profile-message.success {
+  background-color: rgb(224, 231, 255);
+  color: rgb(30, 27, 75);
+}
+
+.profile-page .profile-message.error {
+  background-color: rgb(255, 228, 228);
+  color: rgb(177, 32, 32);
+}
+
+.profile-page .profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-page .profile-section {
+  border: 1px solid rgb(222, 222, 222);
+  border-radius: 4px;
+  padding: 18px;
+}
+
+.profile-page .profile-section-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.profile-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-page label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-page input {
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid rgb(200, 200, 200);
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.profile-page .button-primary {
+  align-self: flex-start;
+  padding: 10px 18px;
+}

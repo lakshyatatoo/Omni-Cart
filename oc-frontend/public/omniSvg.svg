@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="circleBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="60%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="accentRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#FACC15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Background Circle -->
+  <circle cx="100" cy="100" r="96" fill="url(#circleBg)"/>
+
+  <!-- Orbital 'Omni' Loop -->
+  <circle cx="100" cy="92" r="62" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="5"/>
+  <circle cx="100" cy="92" r="62" fill="none" stroke="url(#accentRing)" stroke-width="5" stroke-dasharray="170" stroke-dashoffset="40" stroke-linecap="round"/>
+
+  <!-- Centered Cart Symbol -->
+  <g transform="translate(11, 4)">
+    <path d="M62 72h14l8.8 28a3.5 3.5 0 0 0 3.3 2.5h32.2a3.5 3.5 0 0 0 3.3-2.4l7.1-23.1H80" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="89" cy="112" r="5.5" fill="#FFFFFF"/>
+    <circle cx="114" cy="112" r="5.5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Curved Bottom Label -->
+  <path id="textPath" d="M 40,145 A 68,68 0 0,0 160,145" fill="none"/>
+  <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="14" fill="#FFFFFF" letter-spacing="3">
+    <textPath href="#textPath" startOffset="50%" text-anchor="middle">OMNICART</textPath>
+  </text>
+</svg>
