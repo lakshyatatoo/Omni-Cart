@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import mobileLogoWhite from "../assets/images/mobile-logo-white.png";
 import "./Header.css";
 
 type HeaderProps = {
@@ -43,6 +44,7 @@ export function Header({ cart }: HeaderProps) {
               </span>
               <span className="logo-tagline">EVERYTHING. ANYWHERE.</span>
             </div>
+            <img className="mobile-logo" src={mobileLogoWhite} alt="OmniCart" />
           </Link>
         </div>
 
