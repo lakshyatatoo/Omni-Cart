@@ -73,7 +73,7 @@ export const updateOrderPaymentController = asyncHandler(async (req, res) => {
 });
 
 export const cancelOrderController = asyncHandler(async (req, res) => {
-  const order = await cancelOrder(req.params.id, req.user._id);
+  const order = await cancelOrder(req.params.id, req.user._id, req.user.role);
   res.json({
     status: "success",
     order,

@@ -1,42 +1,41 @@
 import { useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 import api from "../utils/axios";
 import "./AuthModal.css";
 
 export function AuthModal() {
   const navigate = useNavigate();
-  const { authModalOpen, closeAuthModal } = useAuth();
-
-  if (!authModalOpen) {
-    return null;
-  }
+  const [error, setError] = useState("");
 
   const goToRegister = () => {
-    closeAuthModal();
     navigate("/register");
   };
 
   const goToLogin = () => {
-    closeAuthModal();
     navigate("/login");
   };
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
+    setError("");
     const username = e.target.username.value;
     const password = e.target.password.value;
 
     try {
-      const response = await api.post("/api/admin/signin", { username, password });
+      const response = await api.post("/api/admin/signin", {
+        username,
+        password,
+      });
       localStorage.setItem("adminToken", response.data.token);
-      navigate("/admin");
-    } catch (error) {
-      console.error("Admin login failed:", error);
+      window.location.href = "/admin";
+    } catch (err) {
+      console.error("Admin login failed:", err);
+      setError(err.response?.data?.message || "Invalid admin credentials.");
     }
   };
 
   return (
-    <div className="auth-modal-overlay" onClick={closeAuthModal}>
+    <div className="auth-modal-overlay" onClick={() => navigate("/")}>
       <div
         className="auth-modal"
         role="dialog"
@@ -47,7 +46,7 @@ export function AuthModal() {
         <button
           className="auth-modal-close"
           aria-label="Close"
-          onClick={closeAuthModal}
+          onClick={() => navigate("/")}
         >
           &times;
         </button>
@@ -61,6 +60,8 @@ export function AuthModal() {
         <p className="auth-modal-text">
           Please enter your admin credentials to access the admin panel.
         </p>
+
+        {error && <p className="error-message" style={{color: "red", marginBottom: "12px"}}>{error}</p>}
 
         <form onSubmit={handleAdminLogin}>
           <div className="auth-modal-field">

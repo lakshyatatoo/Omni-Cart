@@ -1,7 +1,11 @@
 {
-  "dependencies": {
-    "express": "^5.2.1",
-    "mongoose": "^9.9.3",
-    "nodemon": "^3.1.14"
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:backend dev:frontend",
+    "dev:backend": "cd oc-backend && npm run dev",
+    "dev:frontend": "cd oc-frontend && npm run dev",
+    "seed": "cd oc-backend && npm run seed"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }

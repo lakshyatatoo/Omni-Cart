@@ -26,8 +26,6 @@ router.post("/signin", adminLogin);
 
 router.post("/logout", logout);
 
-router.post("/admin/logout", adminLogout);
-
 router.use(authMiddleware);
 
 router.get("/me", getMe);

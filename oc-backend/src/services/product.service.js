@@ -2,6 +2,18 @@ import { Product } from '../models/product.model.js';
 import { AppError } from '../middleware/error.middleware.js';
 
 export const createProduct = async (productData) => {
+  // Ensure required defaults exist
+  if (!productData.rating) {
+    productData.rating = { stars: 0, count: 0 };
+  }
+  if (productData.stock === undefined || productData.stock === null || productData.stock === '') {
+    productData.stock = 50;
+  }
+  // inStock always reflects the stock count
+  productData.inStock = productData.stock > 0;
+  if (!productData.keywords) {
+    productData.keywords = [];
+  }
   const product = await Product.create(productData);
   return product;
 };
@@ -71,6 +83,11 @@ export const getProductById = async (productId) => {
 };
 
 export const updateProduct = async (productId, updateData) => {
+  // findByIdAndUpdate bypasses save hooks, so sync inStock here
+  if (updateData.stock !== undefined) {
+    updateData.inStock = updateData.stock > 0;
+  }
+
   const product = await Product.findByIdAndUpdate(productId, updateData, {
     new: true,
     runValidators: true

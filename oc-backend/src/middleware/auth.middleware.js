@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { verifyToken } from "../utils/jwt.js";
 import { AppError } from "./error.middleware.js";
@@ -24,6 +25,13 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
   } catch (error) {
     return next(
       new AppError("Invalid or expired token. Please log in again.", 401),
+    );
+  }
+
+  // Reject tokens without a valid ObjectId (e.g. legacy string "admin" ids)
+  if (!mongoose.Types.ObjectId.isValid(decoded.id)) {
+    return next(
+      new AppError("Invalid token. Please log in again.", 401),
     );
   }
 

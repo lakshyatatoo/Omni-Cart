@@ -8,19 +8,58 @@ import "./Tracking.css";
 export function Tracking({ cart,loadCart }) {
   const { orderId, productId } = useParams();
   const [order, setOrder] = useState();
+  const [error, setError] = useState("");
   useEffect(() => {
     const fetchTrackingData = async () => {
-      const response = await api.get(`/api/orders/${orderId}?expand=products`);
-      setOrder(response.data.order);
+      try {
+        const response = await api.get(`/api/orders/${orderId}?expand=products`);
+        setOrder(response.data.order);
+      } catch (err) {
+        console.error("Failed to fetch tracking data:", err);
+        setError(err.response?.data?.message || "Failed to load tracking information.");
+      }
     };
     fetchTrackingData();
   }, [orderId]);
+
+  if (error) {
+    return (
+      <>
+        <Header cart={cart} />
+        <div className="tracking-page">
+          <div className="order-tracking">
+            <Link className="back-to-orders-link link-primary" to="/orders">
+              View all orders
+            </Link>
+            <div className="product-info">{error}</div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (!order) {
     return null;
   }
   const orderProduct = order.items.find((orderProduct) => {
-    return orderProduct.productId._id === productId;
+    return orderProduct.productId?._id?.toString() === productId;
   });
+
+  if (!orderProduct || !orderProduct.productId) {
+    return (
+      <>
+        <Header cart={cart} />
+        <div className="tracking-page">
+          <div className="order-tracking">
+            <Link className="back-to-orders-link link-primary" to="/orders">
+              View all orders
+            </Link>
+            <div className="product-info">Product not found in this order.</div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const deliveryTimems =
     orderProduct.estimatedDeliveryTimeMs - order.orderTimeMs;

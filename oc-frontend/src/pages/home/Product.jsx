@@ -51,14 +51,14 @@ export function Product({ product, loadCart }) {
         <img
           className="product-rating-stars"
           data-testid="product-rating-stars-image"
-          src={`images/ratings/rating-${product.rating.stars * 10}.png`}
+          src={`images/ratings/rating-${(product.rating?.stars || 0) * 10}.png`}
         />
         <div className="product-rating-count link-primary">
-          {product.rating.count}
+          {product.rating?.count || 0}
         </div>
       </div>
 
-      <div className="product-price">{formatMoney(product.priceCents)}</div>
+      <div className="product-price">{formatMoney(product.priceCents || 0)}</div>
 
       <div className="product-quantity-container">
         <select

@@ -1,5 +1,3 @@
-import mobileLogoWhite from "../assets/images/mobile-logo-white.png";
-import logoWhite from "../assets/images/logo-white.png";
 import { Link } from "react-router";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -8,6 +6,7 @@ import "./Header.css";
 
 type HeaderProps = {
   cart: {
+    _id?: string;
     productId: number;
     quantity: number;
     deliveryOptionId: string;
@@ -36,9 +35,14 @@ export function Header({ cart }: HeaderProps) {
     <>
       <div className="header">
         <div className="left-section">
-          <Link to="/" className="header-link">
-            <img className="logo" src={logoWhite} />
-            <img className="mobile-logo" src={mobileLogoWhite} />
+          <Link to="/" className="header-link logo-badge-link">
+            <div className="logo-badge">
+              <span className="logo-badge-name">
+                <span className="logo-omni">Omni</span>
+                <span className="logo-cart">Cart</span>
+              </span>
+              <span className="logo-tagline">EVERYTHING. ANYWHERE.</span>
+            </div>
           </Link>
         </div>
 
@@ -56,7 +60,19 @@ export function Header({ cart }: HeaderProps) {
             }}
           />
           <button className="search-button" onClick={handleSearch}>
-            <img className="search-icon" src="images/icons/search-icon.png" />
+            <svg
+              className="search-arrow-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
 
@@ -68,7 +84,7 @@ export function Header({ cart }: HeaderProps) {
                   className="profile-button"
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 >
-                  <span className="profile-text">Profile</span>
+                  <span className="orders-text">Profile</span>
                 </button>
                 {profileMenuOpen && (
                   <div className="profile-dropdown">

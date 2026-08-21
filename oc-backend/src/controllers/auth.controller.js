@@ -9,6 +9,7 @@ import {
 import { generateToken } from "../utils/jwt.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../middleware/error.middleware.js";
+import { User } from "../models/user.model.js";
 
 export const register = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -114,6 +115,26 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
 export const adminLogin = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
 
+  // Try DB-based admin login first (so token has a valid ObjectId)
+  const adminUser = await User.findOne({ role: "admin" }).select("+password");
+  if (adminUser) {
+    const isMatch = await adminUser.comparePassword(password);
+    if (isMatch && (adminUser.email === username || adminUser.name === username)) {
+      const token = generateToken({ id: adminUser._id, role: "admin" }, "1d");
+      return res.json({
+        status: "success",
+        token,
+        user: {
+          id: adminUser._id,
+          name: adminUser.name,
+          email: adminUser.email,
+          role: "admin",
+        },
+      });
+    }
+  }
+
+  // Fallback to env var check
   if (
     username !== process.env.ADMIN_USERNAME ||
     password !== process.env.ADMIN_PASSWORD
@@ -123,19 +144,39 @@ export const adminLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const token = generateToken({ id: "admin", role: "admin" }, "1d");
+  // Env credentials matched - find or create a DB admin user so the
+  // token always carries a valid Mongoose ObjectId.
+  let envAdmin = await User.findOne({ role: "admin" });
+  if (!envAdmin) {
+    envAdmin = await User.create({
+      name: "Admin User",
+      email: "admin@example.com",
+      password: process.env.ADMIN_PASSWORD || "admin123",
+      role: "admin",
+    });
+  }
+
+  const token = generateToken({ id: envAdmin._id, role: "admin" }, "1d");
 
   res.json({
     status: "success",
     token,
     user: {
-      id: "admin",
+      id: envAdmin._id,
+      name: envAdmin.name,
+      email: envAdmin.email,
       role: "admin",
     },
   });
 });
 
 export const adminLogout = asyncHandler(async (req, res, next) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
   res.json({
     status: "success",
     message: "Admin logged out successfully",

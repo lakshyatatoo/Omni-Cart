@@ -1,32 +1,68 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/axios";
 import "./AdminDashboard.css";
 
 export function AdminDashboard() {
   const navigate = useNavigate();
+  const { adminLogout } = useAuth();
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [adminName, setAdminName] = useState("Admin");
   const [form, setForm] = useState({
-    title: "",
-    price: "",
+    name: "",
+    priceCents: "",
     category: "",
     description: "",
-    imageUrl: "",
-    stock: ""
+    image: "",
+    stock: "50"
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get("/api/products");
-        setProducts(response.data.products);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
+  const fetchProducts = useCallback(async () => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.get("/api/products?limit=100", {
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+      });
+      const responseData = response.data;
+      const productList = Array.isArray(responseData)
+        ? responseData
+        : (responseData.products || []);
+      setProducts(productList);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("token");
+        navigate("/admin-login");
       }
-    };
+      setProducts([]);
+    }
+  }, [navigate]);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.get("/api/orders/admin/all?limit=100", {
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+      });
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("token");
+        navigate("/admin-login");
+      }
+      setOrders([]);
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     fetchProducts();
-  }, []);
+    fetchOrders();
+  }, [fetchProducts, fetchOrders]);
 
   // Check admin token and set name
   useEffect(() => {
@@ -41,7 +77,6 @@ export function AdminDashboard() {
     }
   }, []);
 
-  const handleInputChange = (e) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,25 +86,40 @@ export function AdminDashboard() {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
+      const adminToken = localStorage.getItem("adminToken");
+      const priceCents = Math.round(parseFloat(form.priceCents) * 100);
+      if (isNaN(priceCents) || priceCents < 0) {
+        alert("Please enter a valid price.");
+        return;
+      }
+      const stock = form.stock === "" ? 50 : parseInt(form.stock, 10);
+      if (isNaN(stock) || stock < 0) {
+        alert("Please enter a valid stock count.");
+        return;
+      }
       const response = await api.post("/api/products", {
-        title: form.title,
-        price: form.price,
+        name: form.name,
+        priceCents,
         category: form.category,
         description: form.description,
-        imageUrl: form.imageUrl,
-        stock: form.stock
+        image: form.image,
+        stock,
+        rating: { stars: 0, count: 0 }
+      }, {
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
       });
       setProducts([response.data.product, ...products]);
       setForm({
-        title: "",
-        price: "",
+        name: "",
+        priceCents: "",
         category: "",
         description: "",
-        imageUrl: "",
-        stock: ""
+        image: "",
+        stock: "50"
       });
     } catch (error) {
       console.error("Failed to add product:", error);
+      alert(error.response?.data?.message || "Failed to add product. Check all required fields.");
     }
   };
 
@@ -78,21 +128,41 @@ export function AdminDashboard() {
       return;
     }
     try {
-      await api.delete(`/api/products/${id}`);
+      const adminToken = localStorage.getItem("adminToken");
+      await api.delete(`/api/products/${id}`, {
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+      });
       setProducts(products.filter((p) => p._id !== id));
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    if (!confirm("Are you sure you want to cancel this order?")) {
+      return;
+    }
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      await api.patch(`/api/orders/${orderId}/cancel`, null, {
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+      });
+      fetchOrders();
+      fetchProducts();
+    } catch (error) {
+      console.error("Failed to cancel order:", error);
+      alert(error.response?.data?.message || "Failed to cancel order.");
+    }
+  };
+
   const handleAdminLogout = async () => {
     try {
       await api.post("/api/admin/logout");
-      localStorage.removeItem("adminToken");
-      setAdminName("Admin");
-      navigate("/");
     } catch (error) {
-      console.error("Admin logout failed:", error);
+      console.error("Admin logout API call failed:", error);
+    } finally {
+      adminLogout();
+      navigate("/");
     }
   };
 
@@ -116,23 +186,37 @@ export function AdminDashboard() {
             <label>Title</label>
             <input
               type="text"
-              name="title"
+              name="name"
               placeholder="Product title"
-              value={form.title}
+              value={form.name}
               onChange={handleInputChange}
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Price</label>
+            <label>Price ($)</label>
             <input
               type="number"
-              name="price"
+              name="priceCents"
               placeholder="0.00"
-              value={form.price}
+              step="0.01"
+              value={form.priceCents}
               onChange={handleInputChange}
               required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Stock Count</label>
+            <input
+              type="number"
+              name="stock"
+              placeholder="50"
+              min="0"
+              step="1"
+              value={form.stock}
+              onChange={handleInputChange}
             />
           </div>
 
@@ -161,22 +245,11 @@ export function AdminDashboard() {
             <label>Image URL</label>
             <input
               type="text"
-              name="imageUrl"
+              name="image"
               placeholder="https://example.com/image.jpg"
-              value={form.imageUrl}
+              value={form.image}
               onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Stock</label>
-            <input
-              type="number"
-              name="stock"
-              placeholder="0"
-              value={form.stock}
-              onChange={handleInputChange}
-              min="0"
+              required
             />
           </div>
 
@@ -192,21 +265,33 @@ export function AdminDashboard() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Title</th>
+              <th>Image</th>
+              <th>Name</th>
               <th>Price</th>
-              <th>Category</th>
               <th>Stock</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {(products || []).map((product) => (
               <tr key={product._id}>
                 <td>{product._id.substring(0, 8)}...</td>
-                <td>{product.title}</td>
-                <td>${parseFloat(product.price).toFixed(2)}</td>
-                <td>{product.category || "-"}</td>
-                <td>{product.stock || 0}</td>
+                <td>
+                  <img
+                    src={`/${product.image}`}
+                    alt={product.name}
+                    className="product-thumb"
+                  />
+                </td>
+                <td>{product.name}</td>
+                <td>${(product.priceCents / 100).toFixed(2)}</td>
+                <td>{product.stock}</td>
+                <td>
+                  <span className={`stock-badge ${product.inStock ? "in-stock" : "out-of-stock"}`}>
+                    {product.inStock ? "In Stock" : "Out of Stock"}
+                  </span>
+                </td>
                 <td>
                   <button
                     onClick={() => handleDeleteProduct(product._id)}
@@ -214,6 +299,58 @@ export function AdminDashboard() {
                   >
                     Delete
                   </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="admin-table-section admin-orders-section">
+        <h2>Customer Orders</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.length === 0 && (
+              <tr>
+                <td colSpan="6" className="empty-orders">No orders yet.</td>
+              </tr>
+            )}
+            {(orders || []).map((order) => (
+              <tr key={order._id}>
+                <td>{order._id.substring(0, 8)}...</td>
+                <td>{order.userId?.name || order.userId?.email || "Unknown"}</td>
+                <td>
+                  {order.items.map((item, idx) => (
+                    <div key={item.productId?._id || item.productId || idx} className="order-item">
+                      {item.productId?.name || "Product"} x {item.quantity}
+                    </div>
+                  ))}
+                </td>
+                <td>${(order.totalCostCents / 100).toFixed(2)}</td>
+                <td>
+                  <span className={`status-badge status-${order.status}`}>
+                    {order.status}
+                  </span>
+                </td>
+                <td>
+                  {["pending", "processing"].includes(order.status) && (
+                    <button
+                      onClick={() => handleCancelOrder(order._id)}
+                      className="cancel-btn"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

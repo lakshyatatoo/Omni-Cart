@@ -52,9 +52,21 @@ const productSchema = new mongoose.Schema({
   inStock: {
     type: Boolean,
     default: true
+  },
+  stock: {
+    type: Number,
+    required: [true, 'Stock count is required'],
+    default: 50,
+    min: [0, 'Stock cannot be negative']
   }
 }, {
   timestamps: true
+});
+
+// Keep inStock in sync with the stock count
+productSchema.pre('save', function(next) {
+  this.inStock = this.stock > 0;
+  next();
 });
 
 productSchema.index({ name: 'text', keywords: 'text' });

@@ -314,126 +314,70 @@ const seedDatabase = async () => {
 
     console.log("🌱 Starting database seeding...");
 
-    await Product.deleteMany({});
-    console.log("🗑️  Cleared existing products");
+    // --- Products: only seed if empty ---
+    const productCount = await Product.countDocuments();
+    if (productCount === 0) {
+      const productsWithCategory = defaultProducts.map((product) => {
+        let category = "general";
+        if (
+          product.keywords.some((k) =>
+            ["socks", "sports", "apparel", "mens", "womens", "shoes", "hats", "sweaters", "tshirts", "pants", "shorts", "dress", "heels", "flats", "sneakers", "hoodies", "swimsuit", "bathing", "robe"].includes(k),
+          )
+        ) {
+          category = "apparel";
+        } else if (
+          product.keywords.some((k) =>
+            ["kitchen", "cookware", "appliances", "toaster", "kettle", "blender", "espresso", "plates", "dining", "containers", "towels", "tissues", "napkins", "cleaning"].includes(k),
+          )
+        ) {
+          category = "home & kitchen";
+        } else if (
+          product.keywords.some((k) =>
+            ["electronics", "accessories", "jewelry", "shades", "sunglasses", "mirrors"].includes(k),
+          )
+        ) {
+          category = "accessories";
+        } else if (
+          product.keywords.some((k) =>
+            ["bedroom", "bathroom", "home", "curtains", "bed", "sheets", "mat"].includes(k),
+          )
+        ) {
+          category = "home & kitchen";
+        }
+        return { ...product, category, stock: 50, inStock: true };
+      });
+      await Product.insertMany(productsWithCategory);
+      console.log(`✅ Seeded ${productsWithCategory.length} products`);
+    } else {
+      console.log(`📦 ${productCount} products already in DB, skipping`);
+    }
 
-    const productsWithCategory = defaultProducts.map((product, index) => {
-      let category = "general";
-      if (
-        product.keywords.some((k) =>
-          [
-            "socks",
-            "sports",
-            "apparel",
-            "mens",
-            "womens",
-            "shoes",
-            "hats",
-            "sweaters",
-            "tshirts",
-            "pants",
-            "shorts",
-            "dress",
-            "heels",
-            "flats",
-            "sneakers",
-            "hoodies",
-            "swimsuit",
-            "bathing",
-            "robe",
-          ].includes(k),
-        )
-      ) {
-        category = "apparel";
-      } else if (
-        product.keywords.some((k) =>
-          [
-            "kitchen",
-            "cookware",
-            "appliances",
-            "toaster",
-            "kettle",
-            "blender",
-            "espresso",
-            "plates",
-            "dining",
-            "cookware",
-            "containers",
-            "towels",
-            "tissues",
-            "napkins",
-            "cleaning",
-          ].includes(k),
-        )
-      ) {
-        category = "home & kitchen";
-      } else if (
-        product.keywords.some((k) =>
-          [
-            "electronics",
-            "accessories",
-            "jewelry",
-            "shades",
-            "sunglasses",
-            "mirrors",
-          ].includes(k),
-        )
-      ) {
-        category = "accessories";
-      } else if (
-        product.keywords.some((k) =>
-          [
-            "bedroom",
-            "bathroom",
-            "home",
-            "curtains",
-            "bed",
-            "sheets",
-            "mat",
-          ].includes(k),
-        )
-      ) {
-        category = "home & kitchen";
-      }
+    // --- Delivery options: only seed if empty ---
+    const deliveryCount = await DeliveryOption.countDocuments();
+    if (deliveryCount === 0) {
+      await DeliveryOption.insertMany(defaultDeliveryOptions);
+      console.log(`✅ Seeded ${defaultDeliveryOptions.length} delivery options`);
+    } else {
+      console.log(`📦 ${deliveryCount} delivery options already in DB, skipping`);
+    }
 
-      return {
-        ...product,
-        category,
-        inStock: true,
-      };
-    });
+    // --- Admin user: only create if no admin exists ---
+    const adminExists = await User.findOne({ role: "admin" });
+    if (!adminExists) {
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
+      const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+      await User.create({
+        name: "Admin User",
+        email: adminEmail,
+        password: adminPassword,
+        role: "admin",
+      });
+      console.log(`✅ Created admin user (${adminEmail})`);
+    } else {
+      console.log(`📦 Admin user already exists (${adminExists.email}), skipping`);
+    }
 
-    await Product.insertMany(productsWithCategory);
-    console.log(`✅ Seeded ${productsWithCategory.length} products`);
-
-    await DeliveryOption.deleteMany({});
-    console.log("🗑️  Cleared existing delivery options");
-
-    await DeliveryOption.insertMany(defaultDeliveryOptions);
-    console.log(`✅ Seeded ${defaultDeliveryOptions.length} delivery options`);
-
-    await User.deleteMany({});
-    console.log("🗑️  Cleared existing users");
-
-    const adminPassword = await bcrypt.hash("admin123", 12);
-    await User.create({
-      name: "Admin User",
-      email: "admin@example.com",
-      password: adminPassword,
-      role: "admin",
-    });
-    console.log("✅ Created admin user (admin@example.com / admin123)");
-
-    const userPassword = await bcrypt.hash("user1234", 12);
-    await User.create({
-      name: "Test User",
-      email: "user@example.com",
-      password: userPassword,
-      role: "user",
-    });
-    console.log("✅ Created test user (user@example.com / user1234)");
-
-    console.log("🎉 Database seeding completed successfully!");
+    console.log("🎉 Database seeding completed!");
     process.exit(0);
   } catch (error) {
     console.error("❌ Seeding failed:", error);

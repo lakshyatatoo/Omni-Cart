@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/axios";
 import "./Login.css";
 
 export function Login() {
   const navigate = useNavigate();
+  const { loginUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -27,7 +29,10 @@ export function Login() {
     setLoading(true);
 
     try {
-      await api.post("/api/auth/login", formData);
+      const response = await api.post("/api/auth/login", formData);
+      const { token, user } = response.data;
+
+      loginUser(token, user);
       navigate("/");
     } catch (error) {
       console.error("LOGIN ERROR:", error.response?.data || error);

@@ -86,7 +86,18 @@ export const adminLoginUser = async (username, password) => {
     throw new AppError('Invalid admin credentials', 401);
   }
 
-  const token = generateToken({ id: 'admin', role: 'admin' }, '1d');
+  // Find or create a DB admin user so the token carries a valid ObjectId
+  let admin = await User.findOne({ role: 'admin' });
+  if (!admin) {
+    admin = await User.create({
+      name: 'Admin User',
+      email: 'admin@example.com',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
+      role: 'admin'
+    });
+  }
 
-  return { token };
+  const token = generateToken({ id: admin._id, role: 'admin' }, '1d');
+
+  return { user: admin, token };
 };

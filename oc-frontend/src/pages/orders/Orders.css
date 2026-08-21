@@ -56,6 +56,25 @@
   flex-shrink: 1;
 }
 
+.orders-page .cancel-order-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(185, 28, 28);
+  background: none;
+  border: 1px solid rgb(185, 28, 28);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+.orders-page .cancel-order-btn:hover {
+  color: white;
+  background-color: rgb(185, 28, 28);
+}
+
 @media (max-width: 575px) {
   .orders-page .order-header {
     flex-direction: column;

@@ -114,7 +114,12 @@ export const productValidator = [
   body('inStock')
     .optional()
     .isBoolean()
-    .withMessage('inStock must be a boolean')
+    .withMessage('inStock must be a boolean'),
+
+  body('stock')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Stock must be a non-negative integer')
 ];
 
 export const cartItemValidator = [

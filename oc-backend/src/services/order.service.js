@@ -18,6 +18,14 @@ export const createOrder = async (userId, shippingAddress, paymentMethod = 'cod'
       throw new AppError(`Product not found in cart`, 400);
     }
 
+    // Verify sufficient stock before placing the order
+    if (item.productId.stock < item.quantity) {
+      throw new AppError(
+        `Insufficient stock for product: ${item.productId.name}`,
+        400
+      );
+    }
+
     const deliveryOption = await DeliveryOption.findOne({ id: item.deliveryOptionId });
     if (!deliveryOption) {
       throw new AppError(`Invalid delivery option: ${item.deliveryOptionId}`, 400);
@@ -51,6 +59,14 @@ export const createOrder = async (userId, shippingAddress, paymentMethod = 'cod'
       status: paymentMethod === 'cod' ? 'pending' : 'pending'
     }
   });
+
+  // Decrement stock for every ordered product
+  for (const item of cart.items) {
+    const product = item.productId;
+    product.stock -= item.quantity;
+    product.inStock = product.stock > 0;
+    await product.save();
+  }
 
   cart.items = [];
   await cart.save();
@@ -157,14 +173,30 @@ export const updateOrderPayment = async (orderId, paymentData) => {
   return order;
 };
 
-export const cancelOrder = async (orderId, userId) => {
-  const order = await Order.findOne({ _id: orderId, userId });
+export const cancelOrder = async (orderId, userId, role) => {
+  // Users can only cancel their own orders; admins can cancel any order
+  const query = { _id: orderId };
+  if (role !== 'admin') {
+    query.userId = userId;
+  }
+
+  const order = await Order.findOne(query);
   if (!order) {
     throw new AppError('Order not found', 404);
   }
 
   if (!['pending', 'processing'].includes(order.status)) {
     throw new AppError('Order cannot be cancelled at this stage', 400);
+  }
+
+  // Restore stock for every item in the cancelled order
+  for (const item of order.items) {
+    const product = await Product.findById(item.productId);
+    if (product) {
+      product.stock += item.quantity;
+      product.inStock = product.stock > 0;
+      await product.save();
+    }
   }
 
   order.status = 'cancelled';

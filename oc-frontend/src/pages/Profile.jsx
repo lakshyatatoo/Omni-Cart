@@ -6,6 +6,7 @@ import "../components/Header.css";
 
 export function Profile({ cart }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -25,6 +26,8 @@ export function Profile({ cart }) {
         });
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load profile.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchProfile();
@@ -74,6 +77,7 @@ export function Profile({ cart }) {
       <div className="profile-page">
         <div className="page-title">My Profile</div>
 
+        {loading && <div>Loading profile...</div>}
         {error && <div className="profile-message error">{error}</div>}
         {message && <div className="profile-message success">{message}</div>}
 

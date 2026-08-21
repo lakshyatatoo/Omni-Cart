@@ -20,8 +20,9 @@ export function OrdersGrid({ order, loadCart }) {
   return (
     <div className="order-details-grid">
       {order.items.map((orderProduct) => {
+        if (!orderProduct.productId) return null;
         return (
-          <Fragment key={orderProduct.productId}>
+          <Fragment key={orderProduct.productId._id || orderProduct.productId}>
             <div className="product-image-container">
               <img src={orderProduct.productId.image} />
             </div>

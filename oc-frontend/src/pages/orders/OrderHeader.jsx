@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { formatMoney } from "../../utils/money";
-export function OrderHeader({ order }) {
+export function OrderHeader({ order, onCancel }) {
   return (
     <div className="order-header">
       <div className="order-header-left-section">
@@ -18,6 +18,15 @@ export function OrderHeader({ order }) {
         <div className="order-header-label">Order ID:</div>
         <div>{order._id}</div>
       </div>
+
+      {["pending", "processing"].includes(order.status) && onCancel && (
+        <button
+          className="cancel-order-btn"
+          onClick={() => onCancel(order._id)}
+        >
+          Cancel Order
+        </button>
+      )}
     </div>
   );
 }

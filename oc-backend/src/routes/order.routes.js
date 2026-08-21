@@ -21,20 +21,23 @@ router.use(authMiddleware);
 
 router.post("/", orderValidator, validate, createOrderController);
 router.get("/", getUserOrdersController);
+
+// Admin routes MUST come before /:id to avoid matching "admin" as an id
+router.get("/admin/all", adminMiddleware, getAllOrdersController);
+
 router.get("/:id", mongoIdParam, validate, getOrderController);
 router.patch("/:id/cancel", mongoIdParam, validate, cancelOrderController);
 
-router.use(adminMiddleware);
-
-router.get("/admin/all", getAllOrdersController);
 router.patch(
   "/:id/status",
+  adminMiddleware,
   mongoIdParam,
   validate,
   updateOrderStatusController,
 );
 router.patch(
   "/:id/payment",
+  adminMiddleware,
   mongoIdParam,
   validate,
   updateOrderPaymentController,
